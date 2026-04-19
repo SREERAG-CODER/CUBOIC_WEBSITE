@@ -3,8 +3,13 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-export default function DroneModel() {
+export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: number }) {
     const mountRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef(scrollProgress);
+
+    useEffect(() => {
+        scrollRef.current = scrollProgress;
+    }, [scrollProgress]);
 
     useEffect(() => {
         if (!mountRef.current) return;
@@ -60,10 +65,127 @@ export default function DroneModel() {
         const Cn = (r: number, h: number, s = 8) => new THREE.ConeGeometry(r, h, s);
 
         // ─────────────────────────────────────────────────────────
-        // 1. MAIN BODY
+        // 1. MAIN BODY & BRANDING
         // ─────────────────────────────────────────────────────────
         add(S(1.0, 80, 80), hull, drone);
         add(S(0.92, 32, 32), hullDark, drone);
+
+        // ─────────────────────────────────────────────────────────
+        // BRANDING: MISSION-CRITICAL MARKINGS (Perfeccionado)
+        // ─────────────────────────────────────────────────────────
+        const createBrandingTexture = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; // Doubled for ultra-crisp detail
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Metallic Silver Gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#ffffff');  // Highlight
+            grad.addColorStop(0.5, '#bbccdd'); // Mid-tone Silver
+            grad.addColorStop(1, '#778899');   // Shadow
+            ctx.fillStyle = grad;
+
+            const drawAntler = (c: CanvasRenderingContext2D) => {
+                c.beginPath();
+                // Calligraphic Antler Logic
+                c.moveTo(0, 0); // Start at center-top of head
+                c.bezierCurveTo(10, -20, 45, -10, 50, -35); // Ear/Notch
+                c.bezierCurveTo(45, -30, 35, -35, 38, -60); // Lower horn curve
+                c.bezierCurveTo(45, -100, 75, -130, 80, -165); // Tip
+                c.bezierCurveTo(65, -120, 25, -70, 0, 0); // Return
+                c.fill();
+            };
+
+            // 1. Draw Symmetric Logo
+            const lx = 140, ly = 170;
+            ctx.save();
+            ctx.translate(lx, ly);
+            
+            // Draw head bulb
+            ctx.beginPath();
+            ctx.arc(0, 5, 36, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Right side
+            drawAntler(ctx);
+            // Left side (Mirrored)
+            ctx.scale(-1, 1);
+            drawAntler(ctx);
+            ctx.restore();
+
+            // 2. Industrial "Stippling" Noise Effect
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i + 3] > 0) {
+                    const noise = 0.9 + Math.random() * 0.15;
+                    data[i] *= noise;
+                    data[i + 1] *= noise;
+                    data[i + 2] *= noise;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+
+            // 3. Typography "CUBOIC"
+            ctx.fillStyle = grad;
+            ctx.font = 'bold 164px sans-serif'; 
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.letterSpacing = '12px';
+            ctx.fillText('CUBOIC', 280, ly - 35);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.anisotropy = 16;
+            return tex;
+        };
+
+        /**
+         * BRANDING: MISSION-CRITICAL MARKINGS
+         * Using SphereGeometry patches instead of flat planes to perfectly wrap
+         * around the hull curvature for zero-gap integration.
+         */
+        const brandTex = createBrandingTexture();
+        if (brandTex) brandTex.needsUpdate = true;
+
+        const brandMat = new THREE.MeshStandardMaterial({ 
+            map: brandTex, 
+            transparent: true, 
+            opacity: 1.0,
+            emissive: 0xffffff,
+            emissiveIntensity: 0.08,
+            metalness: 0.95, // High metalness for silver effect
+            roughness: 0.15, // Glossy for metallic sheen
+            side: THREE.FrontSide,
+            polygonOffset: true,
+            polygonOffsetFactor: -4,
+        });
+
+        const patchW = 0.7; // Width
+        const patchH = 0.2; // Height
+
+        // Right Branding (Exact Right Side - X Axis)
+        const brandR = new THREE.Mesh(
+            new THREE.SphereGeometry(1.002, 16, 8, 
+                0 - patchW / 2, patchW, // Phi: 0 is the Right side (+X)
+                Math.PI / 2 - 0.9, patchH
+            ),
+            brandMat
+        );
+        drone.add(brandR);
+
+        // Left Branding (Exact Left Side - X Axis)
+        const brandL = new THREE.Mesh(
+            new THREE.SphereGeometry(1.002, 16, 8, 
+                Math.PI - patchW / 2, patchW, // Phi: PI is the Left side (-X)
+                Math.PI / 2 - 0.9, patchH
+            ),
+            brandMat
+        );
+        drone.add(brandL);
 
         // Equatorial band
         add(T(0.98, 0.028, 12, 80), hullDark, drone, 0, 0, 0, Math.PI / 2);
@@ -476,14 +598,14 @@ export default function DroneModel() {
 
         const onPointerMove = (e: PointerEvent) => {
             if (!isDragging) return;
-            
+
             const deltaX = e.clientX - lastPointerX;
             const deltaY = e.clientY - lastPointerY;
-            
+
             // Adjust rotation based on drag distance
             targetRotY += deltaX * 0.005;
             targetRotX += deltaY * 0.005;
-            
+
             lastPointerX = e.clientX;
             lastPointerY = e.clientY;
         };
@@ -505,14 +627,31 @@ export default function DroneModel() {
             frameId = requestAnimationFrame(animate);
             t += 0.008;
 
-            // Drive high-speed fan rotation
-            fanGroup.rotation.z -= 0.35; // Fast clockwise rotation for turbine feel
+            // --- CINEMATIC TRANSITION LOGIC ---
+            const p = scrollRef.current; // scrollProgress 0 -> 1
 
-            // Model is now stationary if idle (floating removed as per request)
+            // 1. Force Reset Rotation as p increases
+            // We smoothly zero out the target rotations so the drone faces forward
+            const rotationResetFactor = Math.max(0, 1 - p * 4); // Fast reset in first 25%
+            targetRotY *= rotationResetFactor;
+            targetRotX *= rotationResetFactor;
+
             currentRotY += (targetRotY - currentRotY) * 0.08;
             currentRotX += (targetRotX - currentRotX) * 0.08;
             drone.rotation.y = currentRotY;
             drone.rotation.x = currentRotX;
+
+            // 2. Camera Dive into Turbine
+            // Standard: (0, 0.6, 5.5), Target: (0, 0, 1.25)
+            const camHomePos = new THREE.Vector3(0, 0.6, 5.5);
+            const camDivePos = new THREE.Vector3(0, 0, 1.25);
+            camera.position.lerpVectors(camHomePos, camDivePos, Math.pow(p, 1.5)); // Slight ease-in
+            camera.lookAt(0, 0, 0);
+
+            // 3. Accelerate Turbine
+            const turbineSpeedBase = 0.35;
+            const turbineSpeedBoost = p * 0.8;
+            fanGroup.rotation.z -= (turbineSpeedBase + turbineSpeedBoost);
 
             // Continuous system animations (lights/pulses)
             const ep = 0.5 + 0.5 * Math.sin(t * 2.8);

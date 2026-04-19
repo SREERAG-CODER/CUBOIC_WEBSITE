@@ -21,7 +21,7 @@ function toDegreesMinutesSeconds(decimal: number, isLat: boolean): string {
     return `${deg}° ${min}′ ${sec}″ ${dir}`;
 }
 
-export default function Navbar() {
+export default function Navbar({ onNavigate }: { onNavigate?: (section: string) => void }) {
     const [time, setTime] = useState("");
     const [location, setLocation] = useState<LocationData>({
         city: "LOCATING...",
@@ -140,15 +140,23 @@ export default function Navbar() {
 
                         <div style={{ display: "flex", gap: "32px", padding: "0 4px" }}>
                             {NAV_LINKS.map((link) => (
-                                <a key={link} href="#" style={{
-                                    color: link === "Home" ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.45)",
-                                    textDecoration: "none",
-                                    fontSize: "13.5px",
-                                    letterSpacing: "0.03em",
-                                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                                    fontWeight: 400,
-                                    transition: "color 0.2s",
-                                }}>
+                                <a 
+                                    key={link} 
+                                    href="#" 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onNavigate?.(link);
+                                    }}
+                                    style={{
+                                        color: link === "Home" ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.45)",
+                                        textDecoration: "none",
+                                        fontSize: "13.5px",
+                                        letterSpacing: "0.03em",
+                                        fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                                        fontWeight: 400,
+                                        transition: "color 0.2s",
+                                    }}
+                                >
                                     {link}
                                 </a>
                             ))}
