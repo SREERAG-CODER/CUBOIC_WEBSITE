@@ -3,17 +3,38 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: number }) {
+export default function DroneModel({
+    scrollProgress = 0,
+    mode = "hero",
+    mousePos = { x: 0, y: 0 },
+    exitProgress = 0,
+}: {
+    scrollProgress?: number,
+    mode?: "hero" | "follow",
+    mousePos?: { x: number, y: number },
+    exitProgress?: number,
+}) {
     const mountRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef(scrollProgress);
+    const mouseRef = useRef(mousePos);
+    const exitRef = useRef(exitProgress);
 
     useEffect(() => {
         scrollRef.current = scrollProgress;
     }, [scrollProgress]);
 
     useEffect(() => {
+        mouseRef.current = mousePos;
+    }, [mousePos]);
+
+    useEffect(() => {
+        exitRef.current = exitProgress;
+    }, [exitProgress]);
+
+    useEffect(() => {
         if (!mountRef.current) return;
         const mount = mountRef.current;
+        // ... (omitting lines for brevity in instruction, will replace whole block)
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -81,7 +102,7 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
             if (!ctx) return null;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // Metallic Silver Gradient
             const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, '#ffffff');  // Highlight
@@ -92,7 +113,7 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
             const drawAntler = (c: CanvasRenderingContext2D) => {
                 c.beginPath();
                 // Calligraphic Antler Logic - Widened for stronger presence
-                c.moveTo(0, 0); 
+                c.moveTo(0, 0);
                 c.bezierCurveTo(15, -20, 60, -10, 65, -35); // Widened ear
                 c.bezierCurveTo(60, -30, 45, -35, 50, -60); // Widened base
                 c.bezierCurveTo(60, -100, 100, -130, 105, -165); // Widened tip
@@ -104,7 +125,7 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
             const lx = 140, ly = 170;
             ctx.save();
             ctx.translate(lx, ly);
-            
+
             // Draw head bulb
             ctx.beginPath();
             ctx.arc(0, 5, 36, 0, Math.PI * 2);
@@ -132,7 +153,7 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
 
             // 3. Typography "CUBOIC"
             ctx.fillStyle = grad;
-            ctx.font = 'bold 164px sans-serif'; 
+            ctx.font = 'bold 164px sans-serif';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
             ctx.letterSpacing = '12px';
@@ -151,9 +172,9 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
         const brandTex = createBrandingTexture();
         if (brandTex) brandTex.needsUpdate = true;
 
-        const brandMat = new THREE.MeshStandardMaterial({ 
-            map: brandTex, 
-            transparent: true, 
+        const brandMat = new THREE.MeshStandardMaterial({
+            map: brandTex,
+            transparent: true,
             opacity: 1.0,
             emissive: 0xffffff,
             emissiveIntensity: 0.08,
@@ -169,7 +190,7 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
 
         // Right Branding (Exact Right Side - X Axis)
         const brandR = new THREE.Mesh(
-            new THREE.SphereGeometry(1.002, 16, 8, 
+            new THREE.SphereGeometry(1.002, 16, 8,
                 0 - patchW / 2, patchW, // Phi: 0 is the Right side (+X)
                 Math.PI / 2 - 0.9, patchH
             ),
@@ -179,7 +200,7 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
 
         // Left Branding (Exact Left Side - X Axis)
         const brandL = new THREE.Mesh(
-            new THREE.SphereGeometry(1.002, 16, 8, 
+            new THREE.SphereGeometry(1.002, 16, 8,
                 Math.PI - patchW / 2, patchW, // Phi: PI is the Left side (-X)
                 Math.PI / 2 - 0.9, patchH
             ),
@@ -627,31 +648,54 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
             frameId = requestAnimationFrame(animate);
             t += 0.008;
 
-            // --- CINEMATIC TRANSITION LOGIC ---
-            const p = scrollRef.current; // scrollProgress 0 -> 1
+            // --- ANIMATION BRANCHING ---
+            if (mode === "follow") {
+                const ep = exitRef.current; // 0 = tracking cursor, 1 = facing front + diving
 
-            // 1. Force Reset Rotation as p increases
-            // We smoothly zero out the target rotations so the drone faces forward
-            const rotationResetFactor = Math.max(0, 1 - p * 4); // Fast reset in first 25%
-            targetRotY *= rotationResetFactor;
-            targetRotX *= rotationResetFactor;
+                if (ep > 0) {
+                    // EXIT ANIMATION: fade out cursor tracking, face front, camera dives in
+                    targetRotY = mouseRef.current.x * (1 - ep);
+                    targetRotX = mouseRef.current.y * (1 - ep);
+                    // Camera dives toward turbine — same feel as the hero forward dive
+                    const camZ = 4.5 - (4.5 - 1.25) * Math.pow(ep, 1.5);
+                    camera.position.set(0, 0, camZ);
+                } else {
+                    // Normal cursor tracking
+                    targetRotY = mouseRef.current.x;
+                    targetRotX = mouseRef.current.y;
+                    camera.position.set(0, 0, 4.5);
+                }
 
-            currentRotY += (targetRotY - currentRotY) * 0.08;
-            currentRotX += (targetRotX - currentRotX) * 0.08;
-            drone.rotation.y = currentRotY;
-            drone.rotation.x = currentRotX;
+                currentRotY += (targetRotY - currentRotY) * 0.1;
+                currentRotX += (targetRotX - currentRotX) * 0.1;
+                drone.rotation.y = currentRotY;
+                drone.rotation.x = currentRotX;
+                camera.lookAt(0, 0, 0);
 
-            // 2. Camera Dive into Turbine
-            // Standard: (0, 0.6, 5.5), Target: (0, 0, 1.25)
-            const camHomePos = new THREE.Vector3(0, 0.6, 5.5);
-            const camDivePos = new THREE.Vector3(0, 0, 1.25);
-            camera.position.lerpVectors(camHomePos, camDivePos, Math.pow(p, 1.5)); // Slight ease-in
-            camera.lookAt(0, 0, 0);
+                // Turbine accelerates as camera approaches
+                fanGroup.rotation.z -= 0.4 + ep * 0.6;
+            } else {
+                // CINEMATIC TRANSITION LOGIC (Hero Mode)
+                const p = scrollRef.current; // scrollProgress 0 -> 1
 
-            // 3. Accelerate Turbine
-            const turbineSpeedBase = 0.35;
-            const turbineSpeedBoost = p * 0.8;
-            fanGroup.rotation.z -= (turbineSpeedBase + turbineSpeedBoost);
+                const rotationResetFactor = Math.max(0, 1 - p * 4);
+                targetRotY *= rotationResetFactor;
+                targetRotX *= rotationResetFactor;
+
+                currentRotY += (targetRotY - currentRotY) * 0.08;
+                currentRotX += (targetRotX - currentRotX) * 0.08;
+                drone.rotation.y = currentRotY;
+                drone.rotation.x = currentRotX;
+
+                const camHomePos = new THREE.Vector3(0, 0.6, 5.5);
+                const camDivePos = new THREE.Vector3(0, 0, 1.25);
+                camera.position.lerpVectors(camHomePos, camDivePos, Math.pow(p, 1.5));
+                camera.lookAt(0, 0, 0);
+
+                const turbineSpeedBase = 0.35;
+                const turbineSpeedBoost = p * 0.8;
+                fanGroup.rotation.z -= (turbineSpeedBase + turbineSpeedBoost);
+            }
 
             // Continuous system animations (lights/pulses)
             const ep = 0.5 + 0.5 * Math.sin(t * 2.8);
