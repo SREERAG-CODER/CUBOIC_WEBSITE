@@ -14,7 +14,7 @@ const PROJECTS = [
         title: "THAMBI - FOOD DELIVERY ROBOT",
         category: "RESTRAUNT BASED",
         specs: ["FLIGHT TIME: 45M", "RANGE: 12KM", "AI NAVIGATION: V4.2"],
-        description: "Next-gen aerial drone platform with integrated neural processing and carbon-fiber lattice structure."
+        description: "ROBOT FOR FOOD DELIVERY IN RESTAURANTS"
     },
 
 ];

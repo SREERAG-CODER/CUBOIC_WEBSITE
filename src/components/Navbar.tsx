@@ -21,7 +21,7 @@ function toDegreesMinutesSeconds(decimal: number, isLat: boolean): string {
     return `${deg}° ${min}′ ${sec}″ ${dir}`;
 }
 
-export default function Navbar({ onNavigate }: { onNavigate?: (section: string) => void }) {
+export default function Navbar({ onNavigate, activeSection = "Home" }: { onNavigate?: (section: string) => void, activeSection?: string }) {
     const [time, setTime] = useState("");
     const [location, setLocation] = useState<LocationData>({
         city: "LOCATING...",
@@ -148,13 +148,14 @@ export default function Navbar({ onNavigate }: { onNavigate?: (section: string) 
                                         onNavigate?.(link);
                                     }}
                                     style={{
-                                        color: link === "Home" ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.45)",
+                                        color: link === activeSection ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.45)",
+                                        textShadow: link === activeSection ? "0 0 10px rgba(255,255,255,0.4)" : "none",
                                         textDecoration: "none",
                                         fontSize: "13.5px",
                                         letterSpacing: "0.03em",
                                         fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
                                         fontWeight: 400,
-                                        transition: "color 0.2s",
+                                        transition: "color 0.2s, text-shadow 0.2s",
                                     }}
                                 >
                                     {link}

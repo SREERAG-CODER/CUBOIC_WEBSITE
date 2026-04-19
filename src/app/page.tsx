@@ -34,15 +34,17 @@ export default function Home() {
         const handleWheel = (e: WheelEvent) => {
             if (transitionActive.current) return;
 
-            // Trigger transition only if we are at top/bottom of current section
-            if (viewSection === "home" && e.deltaY > 0) {
-                // Moving to Works
-                setScrollAmount(prev => Math.min(1000, prev + e.deltaY * 0.5));
-                if (scrollAmount >= 990) setViewSection("works");
-            } else if (viewSection === "works" && window.scrollY <= 10 && e.deltaY < 0) {
-                // Moving to Home
-                setScrollAmount(prev => Math.max(0, prev + e.deltaY * 0.5));
-                if (scrollAmount <= 10) setViewSection("home");
+            const isMid = scrollAmount > 0 && scrollAmount < 1000;
+            const isHomeStart = viewSection === "home" && scrollAmount === 0 && e.deltaY > 0;
+            const isWorksStart = viewSection === "works" && scrollAmount === 1000 && e.deltaY < 0 && window.scrollY <= 10;
+
+            if (isMid || isHomeStart || isWorksStart) {
+                setScrollAmount(prev => {
+                    const newVal = Math.max(0, Math.min(1000, prev + e.deltaY * 0.5));
+                    if (newVal >= 990 && viewSection === "home") setViewSection("works");
+                    if (newVal <= 10 && viewSection === "works") setViewSection("home");
+                    return newVal;
+                });
             }
         };
 
@@ -91,12 +93,17 @@ export default function Home() {
             const touchY = e.touches[0].clientY;
             const deltaY = lastTouchY.current - touchY;
             
-            if (viewSection === "home" && deltaY > 0) {
-                setScrollAmount(prev => Math.min(1000, prev + deltaY * 2));
-                if (scrollAmount >= 1000) setViewSection("works");
-            } else if (viewSection === "works" && window.scrollY <= 10 && deltaY < 0) {
-                setScrollAmount(prev => Math.max(0, prev + deltaY * 2));
-                if (scrollAmount <= 0) setViewSection("home");
+            const isMid = scrollAmount > 0 && scrollAmount < 1000;
+            const isHomeStart = viewSection === "home" && scrollAmount === 0 && deltaY > 0;
+            const isWorksStart = viewSection === "works" && scrollAmount === 1000 && deltaY < 0 && window.scrollY <= 10;
+
+            if (isMid || isHomeStart || isWorksStart) {
+                setScrollAmount(prev => {
+                    const newVal = Math.max(0, Math.min(1000, prev + deltaY * 2));
+                    if (newVal >= 990 && viewSection === "home") setViewSection("works");
+                    if (newVal <= 10 && viewSection === "works") setViewSection("home");
+                    return newVal;
+                });
             }
             lastTouchY.current = touchY;
         };
@@ -120,7 +127,10 @@ export default function Home() {
             {!loaded && <Preloader onComplete={() => setLoaded(true)} />}
 
             <SpaceBackground />
-            <Navbar onNavigate={navigateToSection} />
+            <Navbar 
+                onNavigate={navigateToSection} 
+                activeSection={scrollAmount < 500 ? "Home" : "Works"} 
+            />
 
             {/* Blackout Overlay for Transitions */}
             <div style={{
