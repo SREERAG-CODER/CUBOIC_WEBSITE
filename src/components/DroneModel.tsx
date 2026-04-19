@@ -91,12 +91,12 @@ export default function DroneModel({ scrollProgress = 0 }: { scrollProgress?: nu
 
             const drawAntler = (c: CanvasRenderingContext2D) => {
                 c.beginPath();
-                // Calligraphic Antler Logic
-                c.moveTo(0, 0); // Start at center-top of head
-                c.bezierCurveTo(10, -20, 45, -10, 50, -35); // Ear/Notch
-                c.bezierCurveTo(45, -30, 35, -35, 38, -60); // Lower horn curve
-                c.bezierCurveTo(45, -100, 75, -130, 80, -165); // Tip
-                c.bezierCurveTo(65, -120, 25, -70, 0, 0); // Return
+                // Calligraphic Antler Logic - Widened for stronger presence
+                c.moveTo(0, 0); 
+                c.bezierCurveTo(15, -20, 60, -10, 65, -35); // Widened ear
+                c.bezierCurveTo(60, -30, 45, -35, 50, -60); // Widened base
+                c.bezierCurveTo(60, -100, 100, -130, 105, -165); // Widened tip
+                c.bezierCurveTo(85, -120, 35, -70, 0, 0); // Return
                 c.fill();
             };
 

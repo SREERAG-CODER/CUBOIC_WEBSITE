@@ -25,7 +25,7 @@ export default function WorksSection() {
             id="works"
             style={{
                 minHeight: "100vh",
-                padding: "120px 60px",
+                padding: "160px 100px", // Increased padding to stay inside the 40px frame
                 display: "flex",
                 flexDirection: "column",
                 gap: "80px",

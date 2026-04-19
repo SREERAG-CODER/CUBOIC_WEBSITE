@@ -94,31 +94,26 @@ export default function Navbar({ onNavigate, activeSection = "Home" }: { onNavig
 
     return (
         <>
-            <span style={corner("top", "left")}>+</span>
-            <span style={corner("top", "right")}>+</span>
-            <span style={corner("bottom", "left")}>+</span>
-            <span style={corner("bottom", "right")}>+</span>
-
             <div style={{
                 position: "fixed",
-                bottom: 0, left: 0, right: 0,
+                bottom: "15px", left: "15px", right: "15px",
                 height: "1px",
-                background: "rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.1)",
                 zIndex: 50,
             }} />
 
             <nav style={{
                 position: "fixed",
-                top: 0, left: 0, right: 0,
-                zIndex: 100,
-                borderBottom: "1px solid rgba(255,255,255,0.12)",
+                top: "4px", left: "15px", right: "15px",
+                zIndex: 600, // Above GlobalFrame
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
             }}>
                 <div style={{
                     display: "grid",
                     gridTemplateColumns: "1fr auto 1fr",
                     alignItems: "center",
                     padding: "0 32px",
-                    height: "52px",
+                    height: "54px",
                 }}>
 
                     {/* Left: auto location */}
@@ -193,18 +188,3 @@ const monoStyle: CSSProperties = {
     fontFamily: "'Courier New', monospace",
     textTransform: "uppercase",
 };
-
-function corner(v: "top" | "bottom", h: "left" | "right"): CSSProperties {
-    return {
-        position: "fixed",
-        [v]: "8px",
-        [h]: "12px",
-        color: "rgba(255,255,255,0.4)",
-        fontSize: "18px",
-        fontFamily: "monospace",
-        fontWeight: 300,
-        zIndex: 200,
-        lineHeight: 1,
-        userSelect: "none",
-    };
-}

@@ -19,6 +19,7 @@ const anton = Anton({
 });
 
 import WorksSection from "@/components/WorksSection";
+import GlobalFrame from "@/components/GlobalFrame";
 import { useEffect, useRef } from "react";
 
 export default function Home() {
@@ -64,10 +65,10 @@ export default function Home() {
         const animateNav = (currentTime: number) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Ease-in-out quint
-            const ease = progress < 0.5 
-                ? 16 * progress * progress * progress * progress * progress 
+            const ease = progress < 0.5
+                ? 16 * progress * progress * progress * progress * progress
                 : 1 - Math.pow(-2 * progress + 2, 5) / 2;
 
             const nextVal = start + (target - start) * ease;
@@ -92,7 +93,7 @@ export default function Home() {
         const handleTouchMove = (e: TouchEvent) => {
             const touchY = e.touches[0].clientY;
             const deltaY = lastTouchY.current - touchY;
-            
+
             const isMid = scrollAmount > 0 && scrollAmount < 1000;
             const isHomeStart = viewSection === "home" && scrollAmount === 0 && deltaY > 0;
             const isWorksStart = viewSection === "works" && scrollAmount === 1000 && deltaY < 0 && window.scrollY <= 10;
@@ -116,20 +117,21 @@ export default function Home() {
     }, [viewSection, scrollAmount]);
 
     return (
-        <main style={{ 
-            position: "relative", 
-            width: "100%", 
-            minHeight: "100vh", 
+        <main style={{
+            position: "relative",
+            width: "100%",
+            minHeight: "100vh",
             overflowX: "hidden",
             overflowY: viewSection === "home" && scrollAmount < 1000 ? "hidden" : "auto",
-            backgroundColor: "#000" 
+            backgroundColor: "#000"
         }}>
             {!loaded && <Preloader onComplete={() => setLoaded(true)} />}
 
             <SpaceBackground />
-            <Navbar 
-                onNavigate={navigateToSection} 
-                activeSection={scrollAmount < 500 ? "Home" : "Works"} 
+            <GlobalFrame />
+            <Navbar
+                onNavigate={navigateToSection}
+                activeSection={scrollAmount < 500 ? "Home" : "Works"}
             />
 
             {/* Blackout Overlay for Transitions */}
@@ -144,12 +146,12 @@ export default function Home() {
             }} />
 
             {/* HERO SECTION */}
-            <div style={{ 
-                height: "100vh", 
-                width: "100%", 
-                position: scrollAmount > 0 ? "fixed" : "relative", 
-                top: 0, 
-                left: 0, 
+            <div style={{
+                height: "100vh",
+                width: "100%",
+                position: scrollAmount > 0 ? "fixed" : "relative",
+                top: 0,
+                left: 0,
                 zIndex: 2,
                 visibility: viewSection === "home" || scrollAmount > 0 ? "visible" : "hidden",
                 opacity: 1 - scrollProgress * 2 // Fade out as we dive
@@ -157,25 +159,28 @@ export default function Home() {
                 {/* Giant background text - CUBOIC */}
                 <div style={{
                     position: "absolute",
-                    top: "72px",
-                    left: 0,
-                    right: 0,
+                    top: "90px",
+                    left: "50px",
+                    right: "50px",
                     zIndex: 1,
                     opacity: loaded ? 1 : 0,
                     transition: "opacity 1s ease 0.5s",
                     pointerEvents: "none",
                 }}>
                     <h1
-                        className={anton.className}
+                        className={orbitron.className}
                         style={{
-                            fontSize: "32vw",
+                            fontSize: "20vw",
                             lineHeight: 0.85,
                             color: "white",
                             margin: 0,
                             textAlign: "center",
                             whiteSpace: "nowrap",
-                            letterSpacing: "0.1em",
+                            letterSpacing: "0.05em",
                             width: "100%",
+                            background: "linear-gradient(to bottom, #ffffff, #da7c24ff)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
                         }}
                     >
                         CUBOIC
@@ -205,7 +210,7 @@ export default function Home() {
                     opacity: loaded ? 1 - scrollProgress * 3 : 0,
                     transition: "opacity 0.8s ease",
                 }}>
-                    <p className={orbitron.className} style={{ fontSize: "28px", color: "white", fontWeight: "bold", letterSpacing: "0.2em", margin: 0, background: "linear-gradient(to bottom, #ffffff, #888888)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    <p className={orbitron.className} style={{ fontSize: "28px", color: "white", fontWeight: "bold", letterSpacing: "0.2em", margin: 0, background: "linear-gradient(to bottom, #ffffff, #f38702ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                         THE FUTURE, DELIVERED
                     </p>
                 </div>
@@ -213,8 +218,8 @@ export default function Home() {
                 <div style={{
                     fontWeight: "bolder",
                     position: "absolute",
-                    bottom: "250px",
-                    right: "35px",
+                    bottom: "335px",
+                    right: "80px",
                     zIndex: 10,
                     opacity: loaded ? 1 - scrollProgress * 3 : 0,
                     transition: "opacity 0.8s ease",
@@ -235,7 +240,7 @@ export default function Home() {
                 transition: "opacity 0.3s ease"
             }}>
                 <WorksSection />
-                
+
                 {/* Additional sections can follow here */}
                 <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                     <h2 className={orbitron.className} style={{ color: "rgba(255,255,255,0.1)", fontSize: "40px", letterSpacing: "0.4em" }}>COMING SOON</h2>
