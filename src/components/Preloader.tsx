@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Logo3D from "./Logo3D";
 
 const BOOT_LINES = [
     "CUBOIC NAV-OS v4.2.1 — COLD START INITIATED",
@@ -235,28 +236,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 });
             }
 
-            // Centre: company name typing
-            const typeP = phase(2.2, 5.2);
-            const charsToShow = Math.floor(typeP * COMPANY.length);
-            const displayText = COMPANY.slice(0, charsToShow);
-
-            if (charsToShow > 0) {
-                const fontSize = Math.max(18, W * 0.028);
-                ctx.save();
-                ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
-                ctx.fillStyle = `rgba(255,255,255,${Math.min(1, typeP * 3)})`;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(displayText, cx, cy);
-                if (charsToShow < COMPANY.length) {
-                    const textW = ctx.measureText(displayText).width;
-                    if (Math.sin(t * 8) > 0) {
-                        ctx.fillStyle = "rgba(255,255,255,0.8)";
-                        ctx.fillRect(cx + textW / 2 + 4, cy - fontSize * 0.5, 2, fontSize);
-                    }
-                }
-                ctx.restore();
-            }
+            // Centre: space reserved for 3D logo component (typing text removed)
 
             // Centre dot
             ctx.save();
@@ -344,6 +324,22 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 ref={canvasRef}
                 style={{ display: "block", width: "100%", height: "100%" }}
             />
+
+            {/* 3D Rotating Logo Centerpiece */}
+            <div style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "min(40vw, 40vh)",
+                height: "min(40vw, 40vh)",
+                zIndex: 5,
+                opacity: done ? 0 : (bootStarted ? 1 : 0),
+                transition: "opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                pointerEvents: "none",
+            }}>
+                <Logo3D size={0.7} />
+            </div>
 
             {/* Boot log — bottom left */}
             <div style={{

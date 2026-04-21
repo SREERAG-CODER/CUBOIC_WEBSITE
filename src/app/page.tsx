@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Anton, Orbitron } from "next/font/google";
+import { Anton, Orbitron, Russo_One } from "next/font/google";
 import SpaceBackground from "@/components/spaceBackground";
 import Navbar from "@/components/Navbar";
 import Preloader from "@/components/Preloader";
@@ -11,6 +11,7 @@ import GlobalFrame from "@/components/GlobalFrame";
 
 const orbitron = Orbitron({ weight: ["400", "700"], subsets: ["latin"] });
 const anton = Anton({ weight: "400", subsets: ["latin"] });
+const techFont = Russo_One({ weight: ["400"], subsets: ["latin"] });
 
 export default function Home() {
     const [loaded, setLoaded] = useState(false);
@@ -33,7 +34,7 @@ export default function Home() {
             if (isMid || isHomeStart || isWorksBack) {
                 e.preventDefault();
                 setScrollAmount(prev => {
-                    const newVal = Math.max(0, Math.min(1000, prev + e.deltaY * 0.5));
+                    const newVal = Math.max(0, Math.min(1000, prev + e.deltaY * 2.2));
                     if (newVal >= 990 && viewSection === "home") setViewSection("works");
                     if (newVal <= 10 && viewSection === "works") setViewSection("home");
                     return newVal;
@@ -59,7 +60,7 @@ export default function Home() {
 
             if (isMid || isHomeStart || isWorksBack) {
                 setScrollAmount(prev => {
-                    const newVal = Math.max(0, Math.min(1000, prev + deltaY * 2));
+                    const newVal = Math.max(0, Math.min(1000, prev + deltaY * 3.5));
                     if (newVal >= 990 && viewSection === "home") setViewSection("works");
                     if (newVal <= 10 && viewSection === "works") setViewSection("home");
                     return newVal;
@@ -156,7 +157,7 @@ export default function Home() {
                 {/* Giant background text - CUBOIC with scroll-driven letter drop */}
                 <div style={{
                     position: "absolute",
-                    top: "90px",
+                    top: "125px",
                     left: "50px",
                     right: "50px",
                     zIndex: 1,
@@ -165,32 +166,45 @@ export default function Home() {
                     pointerEvents: "none",
                 }}>
                     <h1
-                        className={orbitron.className}
+                        className={techFont.className}
                         style={{
-                            fontSize: "20vw",
-                            lineHeight: 0.85,
+                            fontSize: "20.5vw", // Russo One is very chunky and wide
+                            fontWeight: 400,
+                            lineHeight: 0.8,
                             margin: 0,
                             textAlign: "center",
                             whiteSpace: "nowrap",
-                            letterSpacing: "0.05em",
+                            letterSpacing: "-0.02em",
                             width: "100%",
+                            pointerEvents: "none",
                         }}
                     >
                         {(['C', 'U', 'B', 'O', 'I', 'C'] as const).map((letter, i) => {
-                            // All letters drop simultaneously
                             const t = Math.max(0, Math.min(1, scrollProgress / 0.42));
-                            // Ease-in-quint: slow start → fast drop (gravity feel)
                             const eased = t * t * t * t * t;
-                            const translateY = eased * 130; // % of letter height
+                            const translateY = eased * 130;
                             return (
                                 <span
                                     key={i}
                                     style={{
                                         display: "inline-block",
-                                        transform: `translateY(${translateY}%)`,
-                                        background: "linear-gradient(to bottom, #ffffff, #da7c24ff)",
+                                        transform: `translateY(${translateY}%) scaleY(1.4)`,
+                                        background: "linear-gradient(to bottom, #ffffff 10%, #f38702 90%)",
                                         WebkitBackgroundClip: "text",
                                         WebkitTextFillColor: "transparent",
+                                        // "Distinguishable" High-Contrast Border:
+                                        // Layer 1: Sharp 1px white inner-border
+                                        // Layer 2: Heavy 3px black outer-border
+                                        filter: `
+                                            drop-shadow(1px 1px 0px #fff)
+                                            drop-shadow(-1px -1px 0px #fff)
+                                            drop-shadow(3px 3px 0px #000)
+                                            drop-shadow(-3px -3px 0px #000)
+                                            drop-shadow(3px -3px 0px #000)
+                                            drop-shadow(-3px 3px 0px #000)
+                                            drop-shadow(0 20px 40px rgba(0,0,0,0.8))
+                                        `,
+                                        padding: "0 0.02em",
                                     }}
                                 >
                                     {letter}
@@ -231,7 +245,7 @@ export default function Home() {
                 <div style={{
                     fontWeight: "bolder",
                     position: "absolute",
-                    bottom: "335px",
+                    bottom: "300px",
                     right: "80px",
                     zIndex: 10,
                     opacity: loaded ? 1 - scrollProgress * 3 : 0,
